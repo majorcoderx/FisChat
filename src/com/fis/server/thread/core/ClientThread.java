@@ -80,7 +80,8 @@ public class ClientThread extends Thread{
 			if(listGroup.get(i).admin.equals(account)){
 				//del group
 				deleteGroup(listGroup.get(i).idGroup);
-			}else{
+			}
+			else{
 				for (int j = 0; j < listGroup.get(i).listAccount.size(); ++j) {
 					if (listGroup.get(i).listAccount.get(j).equals(account)) {
 						sendChangeAccount(listGroup.get(i), account, Key.REMOVE);
@@ -161,7 +162,8 @@ public class ClientThread extends Thread{
 				+ "\" }";
 		for (int i = 0; i < vClient.size(); ++i) {
 			for (int j = 0; j < group.listAccount.size(); ++j) {
-				if (vClient.get(i).account.equals(group.listAccount.get(j))) {
+				if (vClient.get(i).account.equals(group.listAccount.get(j))
+						&& !vClient.get(i).account.equals(account)) {
 					vClient.get(i).os.writeUTF(msg + "\r\n");
 				}
 			}
@@ -183,7 +185,7 @@ public class ClientThread extends Thread{
 			if(vClient.get(i).account.equals(account)){
 				String msg = "{ \"type\" : \"gr\", \"idGroup\" : \""
 						+ group.idGroup + "\", \"action\" : \"del\" }";
-				vClient.get(i).os.writeUTF(msg);
+				vClient.get(i).os.writeUTF(msg + "\r\n");
 			}
 		}
 	}
@@ -227,7 +229,7 @@ public class ClientThread extends Thread{
 					String msg = "{ \"type\" : \"gr\", \"idGroup\" : \""
 							+ group.idGroup + "\", \"action\" : \"del\" }";
 					if(!vClient.get(i).account.equals(account))
-						vClient.get(i).os.writeUTF(msg);
+						vClient.get(i).os.writeUTF(msg+"\r\n");
 				}
 			}
 		}
@@ -254,7 +256,7 @@ public class ClientThread extends Thread{
 						+ this.account
 						+ "\", \"content\" : \""
 						+ signalMsg.getContent() + "\" }";
-				vClient.get(i).os.writeUTF(msg);
+				vClient.get(i).os.writeUTF(msg+"\r\n");
 				break;
 			}
 		}
@@ -264,7 +266,6 @@ public class ClientThread extends Thread{
 		for (int j = 0; j < listGroup.size(); ++j) {
 			if (listGroup.get(j).idGroup.equals(signalMsg.getIdGroup())) {
 				sendMsgToAllAccountInGroup(listGroup.get(j), signalMsg,msg);
-				System.out.println("GUI CHO CAC CA NHAN TRONG GROUP");
 				break;
 			}
 		}

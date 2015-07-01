@@ -52,7 +52,6 @@ public class GForm{
 		CForm.listGroup.add(idGroup);
 		this.account = this.admin = acc; 
 		initialize();
-		frame.setVisible(true);
 	}
 	
 	public GForm(Client client,Vector<String> listRecv, String acc, String admin,String idGroup) {
@@ -62,7 +61,6 @@ public class GForm{
 		this.admin = admin;
 		this.idGroup = idGroup;
 		initialize();
-		frame.setVisible(true);
 		if(!acc.equals(admin)){
 			btnDel.setEnabled(false);
 			btnName.setEnabled(false);
@@ -71,7 +69,7 @@ public class GForm{
 	}
 
 	private void initialize() {
-		frame = new JFrame("Name: " + account);
+		frame = new JFrame("|Group :" +idGroup+ "|-|Name:" + account+"|");
 		frame.setResizable(false);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {

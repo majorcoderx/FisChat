@@ -87,6 +87,7 @@ public class Client extends Thread {
 			if(CForm.listChatGroup.get(i).idGroup.equals(signalGroup.getIdGroup())){
 				CForm.listChatGroup.get(i).listRecv.add(signalGroup.getChangeAccount());
 				CForm.listChatGroup.get(i).cbblistGroup.updateUI();
+				CForm.listChatGroup.get(i).textChat.append("[join] :" + signalGroup.getChangeAccount()+"\n");
 			}
 		}
 	}
@@ -96,6 +97,7 @@ public class Client extends Thread {
 			if(CForm.listChatGroup.get(i).idGroup.equals(signalGroup.getIdGroup())){
 				CForm.listChatGroup.get(i).listRecv.remove(signalGroup.getChangeAccount());
 				CForm.listChatGroup.get(i).cbblistGroup.setSelectedIndex(0);
+				CForm.listChatGroup.get(i).textChat.append("[out] :" + signalGroup.getChangeAccount()+"\n");
 			}
 		}
 	}

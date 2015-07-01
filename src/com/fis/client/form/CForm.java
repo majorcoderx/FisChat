@@ -98,27 +98,11 @@ public class CForm extends Thread{
 					}
 					System.exit(1);
 				}
-				if(!listChatForm.isEmpty()){ 
-					for(int i = 0 ;i < listChatForm.size(); ++i){
-						client.sendMsgOne("out", listChatForm.get(i).recv, textAcc.getText());
-					}
-					listChatForm.clear();
+				if(!listChatForm.isEmpty() || !listChatGroup.isEmpty()){ 
+					removeAllList();
 					System.exit(1);
 				}
-				if(!listChatGroup.isEmpty()){
-					for(int i = 0; i < listChatGroup.size(); ++i){
-						if(textAcc.getText().equals(listChatGroup.get(i).admin)){
-							client.turnOfGroup(listChatGroup.get(i).idGroup);
-							listChatGroup.get(i).frame.setVisible(false);
-						}
-						else{
-							client.removeAccountGroup(listChatGroup.get(i).idGroup, textAcc.getText());
-							listChatGroup.get(i).frame.setVisible(false);
-						}
-					}
-					listChatGroup.clear();
-					System.exit(1);
-				}
+				
 			}
 		});
 		frame.setBounds(100, 100, 552, 398);
@@ -195,6 +179,7 @@ public class CForm extends Thread{
 				if(!login) return;
 				client.logoutSystem();
 				login = false;
+				removeAllList();
 				resetText();
 			}
 		});
@@ -239,6 +224,7 @@ public class CForm extends Thread{
 						}
 						else{
 							listChatGroup.get(i).frame.setVisible(true);
+							listChatGroup.get(i).cbblistGroup.updateUI();
 						}
 					}
 				}
@@ -290,5 +276,28 @@ public class CForm extends Thread{
 		textAcc.setText("");
 		textPass.setText("");
 		listOnl.removeAll();
+		listGroup.removeAll();
+	}
+	
+	public void removeAllList(){
+		if(!listChatForm.isEmpty()){ 
+			for(int i = 0 ;i < listChatForm.size(); ++i){
+				client.sendMsgOne("out", listChatForm.get(i).recv, textAcc.getText());
+			}
+			listChatForm.clear();
+		}
+		if(!listChatGroup.isEmpty()){
+			for(int i = 0; i < listChatGroup.size(); ++i){
+				if(textAcc.getText().equals(listChatGroup.get(i).admin)){
+					client.turnOfGroup(listChatGroup.get(i).idGroup);
+					listChatGroup.get(i).frame.setVisible(false);
+				}
+				else{
+					client.removeAccountGroup(listChatGroup.get(i).idGroup, textAcc.getText());
+					listChatGroup.get(i).frame.setVisible(false);
+				}
+			}
+			listChatGroup.clear();
+		}
 	}
 }
