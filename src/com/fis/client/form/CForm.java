@@ -23,6 +23,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JPasswordField;
+import java.awt.event.WindowStateListener;
+import java.awt.event.WindowFocusListener;
 
 public class CForm extends Thread{
 
@@ -37,7 +39,9 @@ public class CForm extends Thread{
 	private Client client;
 	private JPasswordField textPass;
 	
+	
 	public static List listOnl;
+	public static List listGroup;
 	public static JTextArea textChat;
 	
 	public static ArrayList<ChForm> listChatForm = new ArrayList<ChForm>();
@@ -72,26 +76,52 @@ public class CForm extends Thread{
 
 	public CForm() {
 		initialize();
+		textPort.setText("111");
+		textPass.setText("111");
 		frame.setVisible(true);
 	}
 
 	private void initialize() {
 		frame = new JFrame();
+		frame.setResizable(false);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				int keep = JOptionPane.showConfirmDialog(null,
 						"Would you like close application?", "Shutdown",
 						JOptionPane.YES_NO_OPTION);
-				if (keep == 0) {
+				
+				if (keep == 0 && listChatForm.isEmpty() && listChatGroup.isEmpty()) {
 					if (login) {
 						client.logoutSystem();
 					}
 					System.exit(1);
 				}
+				if(!listChatForm.isEmpty()){ 
+					for(int i = 0 ;i < listChatForm.size(); ++i){
+						client.sendMsgOne("out", listChatForm.get(i).recv, textAcc.getText());
+					}
+					listChatForm.clear();
+					System.exit(1);
+				}
+				if(!listChatGroup.isEmpty()){
+					for(int i = 0; i < listChatGroup.size(); ++i){
+						if(textAcc.getText().equals(listChatGroup.get(i).admin)){
+							client.turnOfGroup(listChatGroup.get(i).idGroup);
+							listChatGroup.get(i).frame.setVisible(false);
+						}
+						else{
+							client.removeAccountGroup(listChatGroup.get(i).idGroup, textAcc.getText());
+							listChatGroup.get(i).frame.setVisible(false);
+						}
+					}
+					listChatGroup.clear();
+					System.exit(1);
+				}
 			}
 		});
-		frame.setBounds(100, 100, 450, 398);
+		frame.setBounds(100, 100, 552, 398);
 		frame.getContentPane().setLayout(null);
 		
 		JLabel lblAccount = new JLabel("Account");
@@ -133,6 +163,7 @@ public class CForm extends Thread{
 		frame.getContentPane().add(btnLogin);
 		
 		JScrollPane scrollPane = new JScrollPane();
+		
 		scrollPane.setBounds(10, 133, 276, 181);
 		frame.getContentPane().add(scrollPane);
 		
@@ -175,15 +206,46 @@ public class CForm extends Thread{
 			public void itemStateChanged(ItemEvent e) {
 				if (!login)
 					return;
-				// open new windows
 				String recv = listOnl.getItem(((int) e.getItem()));
-				ChForm chForm = new ChForm(recv, client, textAcc
-						.getText());
-				listChatForm.add(chForm);
+				boolean checkOpenChForm = true;
+				for(int i = 0; i < listChatForm.size(); ++i){
+					if(listChatForm.get(i).recv.equals(recv)){
+						checkOpenChForm = false;
+					}
+				}
+				if(checkOpenChForm){
+					ChForm chForm = new ChForm(recv, client, textAcc.getText());
+					listChatForm.add(chForm);
+				}
+				else{
+					JOptionPane.showMessageDialog(frame, "Windows opened !");
+				}
 			}
 		});
-		listOnl.setBounds(296, 46, 128, 268);
+		listOnl.setBounds(296, 46, 116, 268);
 		frame.getContentPane().add(listOnl);
+		
+		listGroup = new List();
+		listGroup.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				//group list
+				if (!login)
+					return;
+				String idGroup = listGroup.getItem(((int) e.getItem()));
+				for(int i = 0 ; i < listChatGroup.size(); ++i){
+					if(listChatGroup.get(i).idGroup.equals(idGroup)){
+						if(listChatGroup.get(i).frame.isVisible()){
+							return;
+						}
+						else{
+							listChatGroup.get(i).frame.setVisible(true);
+						}
+					}
+				}
+			}
+		});
+		listGroup.setBounds(418, 46, 122, 268);
+		frame.getContentPane().add(listGroup);
 		
 		textMsg = new JTextField();
 		textMsg.setBounds(10, 325, 276, 27);
@@ -217,7 +279,7 @@ public class CForm extends Thread{
 				NewForm newForm = new NewForm(client,textAcc.getText());
 			}
 		});
-		btnNewMsg.setBounds(378, 327, 46, 23);
+		btnNewMsg.setBounds(490, 327, 46, 23);
 		frame.getContentPane().add(btnNewMsg);
 	}
 	
@@ -227,5 +289,6 @@ public class CForm extends Thread{
 		textChat.setText("");
 		textAcc.setText("");
 		textPass.setText("");
+		listOnl.removeAll();
 	}
 }

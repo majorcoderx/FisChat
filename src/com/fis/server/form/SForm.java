@@ -25,7 +25,7 @@ public class SForm extends Thread{
 	private JButton btnCloseServer;
 	private JButton btnOpenServer;
 	private JScrollPane scrollPane;
-	private JTextField textChat;
+	private JTextField textMsg;
 	private JButton btnSend;
 	private Server server;
 	
@@ -44,7 +44,7 @@ public class SForm extends Thread{
 			btnOpenServer.setEnabled(!openServer);
 			btnCloseServer.setEnabled(openServer);
 			btnSend.setEnabled(openServer);
-			textChat.setEnabled(openServer);
+			textMsg.setEnabled(openServer);
 			textPort.setEnabled(!openServer);
 			textAreaChat.setEnabled(openServer);
 			listGroup.setEnabled(openServer);
@@ -60,6 +60,8 @@ public class SForm extends Thread{
 
 	private void initialize() {
 		frame = new JFrame("FIS SERVER");
+		frame.setResizable(false);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent arg) {
@@ -69,7 +71,6 @@ public class SForm extends Thread{
 					    "Shutdown",
 					    JOptionPane.YES_NO_OPTION);
 				if(keep == 0){
-					//client.close();
 					System.exit(1);
 				}
 			}
@@ -131,16 +132,21 @@ public class SForm extends Thread{
 		textAreaChat = new JTextArea();
 		scrollPane.setViewportView(textAreaChat);
 		
-		textChat = new JTextField();
-		textChat.setBounds(10, 248, 214, 29);
-		frame.getContentPane().add(textChat);
-		textChat.setColumns(10);
+		textMsg = new JTextField();
+		textMsg.setBounds(10, 248, 214, 29);
+		frame.getContentPane().add(textMsg);
+		textMsg.setColumns(10);
 		
 		btnSend = new JButton(">>>");
 		btnSend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if(!openServer) return;
+				if(!textMsg.equals("")){
+					textAreaChat.append("<SERVER>" + textMsg.getText() + "\n" );
+					server.notifyAllUser(textMsg.getText());
+					textMsg.setText("");
+				}
 			}
 		});
 		btnSend.setBounds(234, 251, 60, 23);

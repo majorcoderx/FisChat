@@ -23,6 +23,7 @@ public class GetMessage extends Thread {
 			}
 		}catch(IOException e){
 			e.printStackTrace();
+			queueMessage.add("{ \"type\" : \"out\"}");
 		}
 	}
 

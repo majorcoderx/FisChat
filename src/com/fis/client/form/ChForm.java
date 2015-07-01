@@ -1,7 +1,5 @@
 package com.fis.client.form;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
@@ -16,11 +14,9 @@ import java.awt.event.WindowEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JLabel;
-
 public class ChForm {
 
-	private JFrame frame;
+	public JFrame frame;
 	private JTextField textMsg;
 	private Client client;
 	public String account;
@@ -32,23 +28,16 @@ public class ChForm {
 		this.client = client;
 		this.account = sender;
 		this.recv = recv;
-		frame = new JFrame(recv);
-		frame.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent arg0) {
-				CForm.listChatForm.remove(this);
-				
-			}
-		});
+		frame = new JFrame("Chat with >> " + recv);
+		frame.setResizable(false);
+		
 		frame.setBounds(100, 100, 382, 318);
 		frame.getContentPane().setLayout(null);
 		initialize();
 		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 	}
 
-	/**
-	 * Initialize the contents of the frame.
-	 */
 	private void initialize() {
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -86,5 +75,22 @@ public class ChForm {
 		});
 		btnCreate.setBounds(315, 11, 41, 23);
 		frame.getContentPane().add(btnCreate);
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				int keep = JOptionPane.showConfirmDialog(null,
+						"Would you like go out chat session?", "Chat Session",
+						JOptionPane.YES_NO_OPTION);
+				if (keep == 0){
+					client.sendMsgOne("out", recv, account);
+					for(int i = 0 ; i < CForm.listChatForm.size(); ++i){
+						if(CForm.listChatForm.get(i).recv.equals(recv)){
+							CForm.listChatForm.remove(i);
+						}
+					}
+					frame.setVisible(false);
+				}
+			}
+		});
 	}
 }

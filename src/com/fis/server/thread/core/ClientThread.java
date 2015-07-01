@@ -19,7 +19,7 @@ import com.fis.server.message.SignalMessage;
 
 public class ClientThread extends Thread{
 	
-	private String account = "";
+	public String account = "";
 	
 	private Socket clientSocket;
 	private Queue<String> queueMessage = new LinkedList<String>();
@@ -28,6 +28,7 @@ public class ClientThread extends Thread{
 	private Vector<Group> listGroup;
 	
 	private DataOutputStream os;
+	public DataOutputStream osServer = null;
 	
 	public ClientThread(Socket clientSocket,Vector<ClientThread> vClient,
 						Vector<String> listAccount, Vector<Group> listGroup){
@@ -38,10 +39,11 @@ public class ClientThread extends Thread{
 	}
 	
 	public void run(){
-		GetMessage getMessage = new GetMessage(clientSocket,queueMessage);
-		getMessage.start();
 		try{
+			GetMessage getMessage = new GetMessage(clientSocket,queueMessage);
+			getMessage.start();
 			os = new DataOutputStream(clientSocket.getOutputStream());
+			osServer = os;
 			while(true){
 				if(queueMessage.size() > 0){
 					String msg = queueMessage.remove();
@@ -51,8 +53,9 @@ public class ClientThread extends Thread{
 						sendResultLogin(msg);
 					}
 					if (signal.type.equals(Key.LOGOUT)) {
-						//logout all group
+						logoutAllGroup();
 						updateRemoveListOnline();
+						getMessage.interrupt();
 						this.clientSocket.close();
 						this.interrupt();
 					}
@@ -70,8 +73,21 @@ public class ClientThread extends Thread{
 		}
 	}
 	
-	public void logoutAllGroup(){
-		
+	public void logoutAllGroup() throws IOException {
+		System.out.println(account);
+		for (int i = 0; i < listGroup.size(); ++i) {
+			System.out.println(listGroup.get(i).admin);
+			if(listGroup.get(i).admin.equals(account)){
+				//del group
+				deleteGroup(listGroup.get(i).idGroup);
+			}else{
+				for (int j = 0; j < listGroup.get(i).listAccount.size(); ++j) {
+					if (listGroup.get(i).listAccount.get(j).equals(account)) {
+						sendChangeAccount(listGroup.get(i), account, Key.REMOVE);
+					}
+				}
+			}
+		}
 	}
 	
 	public void analystGroupSignal(String msg) throws IOException{
@@ -138,11 +154,14 @@ public class ClientThread extends Thread{
 		}
 	}
 	
-	public void sendChangeAccount(Group group, String account,String action) throws IOException{
-		String msg = "{ \"type\" : \"gr\", \"idGroup\" : \""+group.idGroup+"\", \"action\" : \""+action+"\", \"acc\" : \""+account+"\" }";
-		for(int i = 0 ; i < vClient.size(); ++i){
-			for(int j = 0 ; j < group.listAccount.size(); ++j){
-				if(vClient.get(i).account.equals(group.listAccount.get(j))){
+	public void sendChangeAccount(Group group, String account, String action)
+			throws IOException {
+		String msg = "{ \"type\" : \"gr\", \"idGroup\" : \"" + group.idGroup
+				+ "\", \"action\" : \"" + action + "\", \"acc\" : \"" + account
+				+ "\" }";
+		for (int i = 0; i < vClient.size(); ++i) {
+			for (int j = 0; j < group.listAccount.size(); ++j) {
+				if (vClient.get(i).account.equals(group.listAccount.get(j))) {
 					vClient.get(i).os.writeUTF(msg + "\r\n");
 				}
 			}
@@ -169,22 +188,23 @@ public class ClientThread extends Thread{
 		}
 	}
 	
-	
-	public void sendInfoGroup(Group group) throws IOException{
-		String msg = "{ \"type\" : \"gr\", \"idGroup\": \""+group.idGroup+"\", \"action\" : \"create\", \"admin\" : \""+group.admin+"\", \"name\" : [ ";
-		for(int i = 0 ;i < group.listAccount.size() ; ++i){
-			if( i != group.listAccount.size() -1){
-				msg+="{ \"acc\" : \""+group.listAccount.get(i)+"\" },";
-			}
-			else{
-				msg+="{ \"acc\" : \""+group.listAccount.get(i)+"\" }";
+	public void sendInfoGroup(Group group) throws IOException {
+		String msg = "{ \"type\" : \"gr\", \"idGroup\": \"" + group.idGroup
+				+ "\", \"action\" : \"create\", \"admin\" : \"" + group.admin
+				+ "\", \"name\" : [ ";
+		for (int i = 0; i < group.listAccount.size(); ++i) {
+			if (i != group.listAccount.size() - 1) {
+				msg += "{ \"acc\" : \"" + group.listAccount.get(i) + "\" },";
+			} else {
+				msg += "{ \"acc\" : \"" + group.listAccount.get(i) + "\" }";
 			}
 		}
 		msg += " ] }";
-		for(int i = 0 ; i < vClient.size(); ++i){
-			for(int j = 0 ; j < group.listAccount.size(); ++j){
-				if(vClient.get(i).account.equals(group.listAccount.get(j))){
-					vClient.get(i).os.writeUTF(msg+ "\r\n");
+		for (int i = 0; i < vClient.size(); ++i) {
+			for (int j = 0; j < group.listAccount.size(); ++j) {
+				if (vClient.get(i).account.equals(group.listAccount.get(j))
+						&& !vClient.get(i).account.equals(group.admin)) {
+					vClient.get(i).os.writeUTF(msg + "\r\n");
 				}
 			}
 		}
@@ -206,7 +226,8 @@ public class ClientThread extends Thread{
 				if (vClient.get(i).account.equals(group.listAccount.get(j))) {
 					String msg = "{ \"type\" : \"gr\", \"idGroup\" : \""
 							+ group.idGroup + "\", \"action\" : \"del\" }";
-					vClient.get(i).os.writeUTF(msg);
+					if(!vClient.get(i).account.equals(account))
+						vClient.get(i).os.writeUTF(msg);
 				}
 			}
 		}
@@ -225,7 +246,7 @@ public class ClientThread extends Thread{
 			sendChatAll(msg);
 		}
 	}
-	
+
 	public void sendChatOne(SignalMessage signalMsg) throws IOException {
 		for (int i = 0; i < vClient.size(); ++i) {
 			if (signalMsg.getRecv().equals(vClient.get(i).account)) {
@@ -249,17 +270,15 @@ public class ClientThread extends Thread{
 		}
 	}
 
-	public void sendMsgToAllAccountInGroup(Group group, SignalMessage signalMsg,String msg)
-			throws IOException {
+	public void sendMsgToAllAccountInGroup(Group group,
+			SignalMessage signalMsg, String msg) throws IOException {
 		for (int i = 0; i < vClient.size(); ++i) {
 			for (int j = 0; j < group.listAccount.size(); ++j) {
 				if (vClient.get(i).account.equals(group.listAccount.get(j))
-						&& !vClient.get(i).account.equals(signalMsg.getSender())) {
-					vClient.get(i).os.writeUTF(msg+ "\r\n");
+						&& !vClient.get(i).account
+								.equals(signalMsg.getSender())) {
+					vClient.get(i).os.writeUTF(msg + "\r\n");
 				}
-			}
-			if(!signalMsg.getSender().equals(group.admin) && vClient.get(i).account.equals(group.admin)){
-				vClient.get(i).os.writeUTF(msg + "\r\n");
 			}
 		}
 	}

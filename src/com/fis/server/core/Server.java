@@ -61,6 +61,18 @@ public class Server extends Thread{
 			e.printStackTrace();
 		}
 	}
+	
+	public void notifyAllUser(String content) {
+		String msg = "{ \"type\" : \"msg\", \"typeMsg\" : \"all\", \"sender\" : \"ADMIN\", \"content\" : \""
+				+ content + "\" }";
+		try {
+			for (int i = 0; i < vClient.size(); ++i) {
+				vClient.get(i).osServer.writeUTF(msg + "\r\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
 
 

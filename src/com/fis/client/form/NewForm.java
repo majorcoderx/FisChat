@@ -49,10 +49,13 @@ public class NewForm extends Thread{
 		listChat.add(recv);
 		textListAccount.append("|" + recv + "| ");
 		typeCreate = 1;
+		this.account = account;
+		this.client = client;
 	}
 
 	private void initialize() {
 		frame = new JFrame("Add your friends");
+		frame.setResizable(false);
 		frame.setBounds(100, 100, 378, 159);
 		frame.getContentPane().setLayout(null);
 		
@@ -98,6 +101,11 @@ public class NewForm extends Thread{
 					return;
 				}
 				if(listChat.size() > 1){
+					System.out.println("List Chat: "+listChat);
+					System.out.println("Account: " + account);
+					if(client != null){
+						System.out.println("CLIENT");
+					}
 					GForm gForm = new GForm(client, listChat, account);
 					CForm.listChatGroup.add(gForm);
 					frame.setVisible(false);

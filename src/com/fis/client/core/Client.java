@@ -76,14 +76,17 @@ public class Client extends Thread {
 			if(CForm.listChatGroup.get(i).idGroup.equals(signalGroup.getIdGroup())){
 				CForm.listChatGroup.get(i).frame.setVisible(false);
 				CForm.listChatGroup.remove(i);
+				CForm.listGroup.remove(signalGroup.getIdGroup());
 			}
 		}
 	}
 	
 	public void addNewAccountGroupChat(SignalChatGroup signalGroup){
+		System.out.println("Add to group");
 		for(int i = 0 ;i < CForm.listChatGroup.size(); ++i){
 			if(CForm.listChatGroup.get(i).idGroup.equals(signalGroup.getIdGroup())){
 				CForm.listChatGroup.get(i).listRecv.add(signalGroup.getChangeAccount());
+				CForm.listChatGroup.get(i).cbblistGroup.updateUI();
 			}
 		}
 	}
@@ -92,6 +95,7 @@ public class Client extends Thread {
 		for(int i = 0 ;i < CForm.listChatGroup.size(); ++i){
 			if(CForm.listChatGroup.get(i).idGroup.equals(signalGroup.getIdGroup())){
 				CForm.listChatGroup.get(i).listRecv.remove(signalGroup.getChangeAccount());
+				CForm.listChatGroup.get(i).cbblistGroup.setSelectedIndex(0);
 			}
 		}
 	}
@@ -108,6 +112,7 @@ public class Client extends Thread {
 			GForm gForm = new GForm(this, signalGroup.getListAccountGroup(),
 					account, signalGroup.getAdmin(), signalGroup.getIdGroup());
 			CForm.listChatGroup.add(gForm);
+			CForm.listGroup.add(signalGroup.getIdGroup());
 		}
 	}
 	
@@ -130,9 +135,10 @@ public class Client extends Thread {
 			if(signalMsg.getSender().equals(CForm.listChatForm.get(i).recv)){
 				CForm.listChatForm.get(i).textChat.append("<"+signalMsg.getSender()+"> "+signalMsg.getContent()+"\n");
 				openForm = false;
+				break;
 			}
 		}
-		if(openForm){
+		if(openForm && !signalMsg.getContent().equals("out")){
 			ChForm chForm = new ChForm(signalMsg.getSender(), this, account);
 			CForm.listChatForm.add(chForm);
 			ChForm.textChat.append("<"+signalMsg.getSender()+"> "+signalMsg.getContent()+"\n");
@@ -143,6 +149,10 @@ public class Client extends Thread {
 		for(int i = 0; i< CForm.listChatGroup.size(); ++i){
 			if (CForm.listChatGroup.get(i).idGroup.equals(signalMsg
 					.getIdGroup())) {
+				if(!CForm.listChatGroup.get(i).frame.isVisible()){
+					CForm.listChatGroup.get(i).frame.setVisible(true);
+				}
+				
 				CForm.listChatGroup.get(i).textChat.append("<"
 						+ signalMsg.getSender() + "> : "
 						+ signalMsg.getContent() + "\n");
@@ -185,6 +195,7 @@ public class Client extends Thread {
 			account = acc;
 		}catch(IOException e){
 			e.printStackTrace();
+			CForm.textChat.append("[Connect] : check your host or post !\n");
 		}
 	}
 	

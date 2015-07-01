@@ -27,7 +27,7 @@ public class GForm{
 	
 	private JTextField textMsg;
 	public Vector<String> listRecv;
-	private JComboBox<String> cbblistGroup;
+	public JComboBox<String> cbblistGroup;
 	public JTextArea textChat;
 	public JButton btnDel;
 	public JButton btnName;
@@ -37,19 +37,22 @@ public class GForm{
 	public String idGroup = "";
 	private Client client;
 	private String account;
-	private String admin;
+	public String admin;
+	private JButton btnOut;
 	
 	public GForm(Client client,Vector<String> listRecv, String acc) {
 		idGroup+=acc;
 		Random rand = new Random();
 		int n = rand.nextInt(1000)+ 500;
 		idGroup+=n;
+		listRecv.add(acc);
 		this.listRecv = listRecv;
 		this.client = client;
 		client.sendCreateGroup(idGroup, listRecv, acc);
+		CForm.listGroup.add(idGroup);
 		this.account = this.admin = acc; 
 		initialize();
-		frame.setVisible(true);	
+		frame.setVisible(true);
 	}
 	
 	public GForm(Client client,Vector<String> listRecv, String acc, String admin,String idGroup) {
@@ -69,36 +72,35 @@ public class GForm{
 
 	private void initialize() {
 		frame = new JFrame("Name: " + account);
+		frame.setResizable(false);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent arg0) {
-				if(checkOpenBtn){
-					int keep = JOptionPane.showConfirmDialog(null,
-							"Would you like close group chat?", "Close",
-							JOptionPane.YES_NO_OPTION);
-					if (keep == 0) {
-						client.turnOfGroup(idGroup);
-					}
-				}
-				frame.setVisible(false);;
+				frame.setVisible(false);
 			}
 		});
-		frame.setBounds(100, 100, 347, 312);
+		frame.setBounds(100, 100, 411, 312);
 		frame.getContentPane().setLayout(null);
 		btnDel = new JButton("-");
 		btnDel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if(listRecv.size() < 2 || !checkOpenBtn ) return;
+				if (listRecv.size() < 2 || !checkOpenBtn)
+					return;
+				if(listRecv.get(indexSelected).equals(account)){
+					JOptionPane.showMessageDialog(frame, "Your don't delete you !");
+					return;
+				}
 				client.removeAccountGroup(idGroup, listRecv.get(indexSelected));
-				listRecv.remove(indexSelected);
-				cbblistGroup.setSelectedIndex(0);
+//				listRecv.remove(indexSelected);
+//				cbblistGroup.setSelectedIndex(0);
 			}
 		});
 		btnDel.setBounds(185, 11, 53, 23);
 		frame.getContentPane().add(btnDel);
 		JScrollPane scrollPaneChat = new JScrollPane();
-		scrollPaneChat.setBounds(10, 44, 311, 186);
+		scrollPaneChat.setBounds(10, 44, 375, 186);
 		frame.getContentPane().add(scrollPaneChat);
 		textChat = new JTextArea();
 		scrollPaneChat.setViewportView(textChat);
@@ -112,19 +114,19 @@ public class GForm{
 						"Add new friends", JOptionPane.PLAIN_MESSAGE, null,
 						possibilities, "");
 				if ((name != null) && (listRecv.indexOf(name) < 0)) {
-				    listRecv.add(0, name);
+//				    listRecv.add(0, name);
 				    client.addAccountGroup(idGroup, name);
-				    cbblistGroup.setSelectedIndex(0);
+//				    cbblistGroup.setSelectedIndex(0);
 				}
 				else{
 					JOptionPane.showMessageDialog(frame, "Can't add new friends !");
 				}
 			}
 		});
-		btnName.setBounds(242, 11, 79, 23);
+		btnName.setBounds(242, 11, 67, 23);
 		frame.getContentPane().add(btnName);
 		textMsg = new JTextField();
-		textMsg.setBounds(10, 237, 245, 29);
+		textMsg.setBounds(10, 237, 311, 29);
 		frame.getContentPane().add(textMsg);
 		textMsg.setColumns(10);
 		JButton btnSend = new JButton(">>>");
@@ -138,12 +140,42 @@ public class GForm{
 				}
 			}
 		});
-		btnSend.setBounds(264, 240, 57, 23);
+		btnSend.setBounds(328, 240, 57, 23);
 		frame.getContentPane().add(btnSend);
 		cbblistGroup = new JComboBox<String>(listRecv);
 		cbblistGroup.setBounds(12, 11, 163, 23);
 		frame.getContentPane().add(cbblistGroup);
 		cbblistGroup.setSelectedIndex(0);
+		
+		btnOut = new JButton("Out");
+		btnOut.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+				if(checkOpenBtn){
+					System.out.println("ADMIN DONG GROUP");
+					int keep = JOptionPane.showConfirmDialog(null,
+							"Would you like close group chat?", "Close",
+							JOptionPane.YES_NO_OPTION);
+					if (keep == 0) {
+						client.turnOfGroup(idGroup);
+						CForm.listGroup.remove(idGroup);
+						frame.setVisible(false);
+					}
+					else return;
+				}
+				else{
+					int keep = JOptionPane.showConfirmDialog(null,
+							"Would you like out group chat?", "Out",
+							JOptionPane.YES_NO_OPTION);
+					if (keep == 0) {
+						client.removeAccountGroup(idGroup, account);
+					}
+					else return;
+				}
+			}
+		});
+		btnOut.setBounds(319, 11, 66, 23);
+		frame.getContentPane().add(btnOut);
 		cbblistGroup.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
