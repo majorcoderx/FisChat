@@ -41,6 +41,7 @@ public class SForm extends Thread{
 	
 	public void run(){
 		while(true){
+			System.out.print("");
 			btnOpenServer.setEnabled(!openServer);
 			btnCloseServer.setEnabled(openServer);
 			btnSend.setEnabled(openServer);
@@ -50,7 +51,6 @@ public class SForm extends Thread{
 			listGroup.setEnabled(openServer);
 			listOnline.setEnabled(openServer);
 		}
-		
 	}
 
 	public SForm() {

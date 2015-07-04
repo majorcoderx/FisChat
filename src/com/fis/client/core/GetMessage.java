@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Queue;
 
+import com.fis.client.form.CForm;
+
 public class GetMessage extends Thread{
 	
 	private Socket clientSocket;
@@ -24,6 +26,13 @@ public class GetMessage extends Thread{
 			}
 		}catch(IOException e){
 			e.printStackTrace();
+			CForm.login = false;
+			CForm.resetText();
+			CForm.listChatForm.clear();
+			CForm.listChatGroup.clear();
+			CForm.listGroup.removeAll();
+			CForm.listOnl.removeAll();
+			CForm.textChat.append("Don't connect to host !\n");
 		}
 	}
 }

@@ -18,11 +18,9 @@ public class GetSocket extends Thread {
 	}
 	
 	public void run(){
-		Socket clientSocket;
 		try{
 			while(true){
-				clientSocket = serverSocket.accept();
-				queueSocket.add(clientSocket);
+				queueSocket.add(serverSocket.accept());
 			}
 		}catch(IOException e){
 			e.printStackTrace();

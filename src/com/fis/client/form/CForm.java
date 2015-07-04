@@ -29,7 +29,7 @@ import java.awt.event.WindowFocusListener;
 public class CForm extends Thread{
 
 	private JFrame frame;
-	private JTextField textAcc;
+	
 	private JTextField textHost;
 	private JTextField textPort;
 	private JTextField textMsg;
@@ -37,12 +37,14 @@ public class CForm extends Thread{
 	private JButton btnSend;
 	private JButton btnLogout;
 	private Client client;
-	private JPasswordField textPass;
+	
 	
 	
 	public static List listOnl;
 	public static List listGroup;
 	public static JTextArea textChat;
+	public static JTextField textAcc;
+	public static JPasswordField textPass;
 	
 	public static ArrayList<ChForm> listChatForm = new ArrayList<ChForm>();
 	public static ArrayList<GForm> listChatGroup = new ArrayList<GForm>();
@@ -57,6 +59,7 @@ public class CForm extends Thread{
 	
 	public void run(){
 		while(true){
+			System.out.print("");
 			btnLogout.setEnabled(login);
 			btnSend.setEnabled(login);
 			btnLogin.setEnabled(!login);
@@ -269,9 +272,7 @@ public class CForm extends Thread{
 		frame.getContentPane().add(btnNewMsg);
 	}
 	
-	public void resetText(){
-		textHost.setText("");
-		textPort.setText("");
+	public static void resetText(){
 		textChat.setText("");
 		textAcc.setText("");
 		textPass.setText("");

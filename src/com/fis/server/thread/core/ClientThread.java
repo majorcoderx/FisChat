@@ -57,6 +57,7 @@ public class ClientThread extends Thread{
 						updateRemoveListOnline();
 						getMessage.interrupt();
 						this.clientSocket.close();
+						vClient.remove(this);
 						this.interrupt();
 					}
 					if (signal.type.equals(Key.GROUP)) {

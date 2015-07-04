@@ -28,7 +28,7 @@ public class ChForm {
 		this.client = client;
 		this.account = sender;
 		this.recv = recv;
-		frame = new JFrame("Chat with >> " + recv);
+		frame = new JFrame(sender + " >> " + recv);
 		frame.setResizable(false);
 		
 		frame.setBounds(100, 100, 382, 318);
